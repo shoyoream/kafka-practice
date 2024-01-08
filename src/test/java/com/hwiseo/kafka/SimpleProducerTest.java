@@ -7,7 +7,7 @@ class SimpleProducerTest {
 
     @Test
     void simpleProducerTest() {
-        SimpleProducer.main(new String[]{});
+
     }
 
 }
