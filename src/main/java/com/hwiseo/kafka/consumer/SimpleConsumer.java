@@ -13,7 +13,7 @@ import java.util.*;
 @Slf4j
 public class SimpleConsumer {
 
-    private final static String TOPIC_NAME = "test";
+    private final static String TOPIC_NAME = "order_join";
     private final static String BOOTSTRAP_SERVERS = "my-kafka:9092";
     private final static String GROUP_ID = "test-group";
     private static KafkaConsumer<String, String> consumer = null;
