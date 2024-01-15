@@ -9,11 +9,13 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class SimpleConsumer {
 
-    private final static String TOPIC_NAME = "order_join";
+    private final static String TOPIC_NAME = "test";
     private final static String BOOTSTRAP_SERVERS = "my-kafka:9092";
     private final static String GROUP_ID = "test-group";
     private static KafkaConsumer<String, String> consumer = null;
@@ -36,6 +38,9 @@ public class SimpleConsumer {
 
 
         consumer = new KafkaConsumer<>(configs);
+
+        /* 컨슈머 워커 테스트 */
+        // consumerWorkerTest(consumer);
 
         // 해당 토픽을 선언한 컨슈머로 구독
         // consumer.subscribe(Arrays.asList(TOPIC_NAME), new RebalanceListener());
@@ -89,6 +94,21 @@ public class SimpleConsumer {
             consumer.close();
         }
 
+    }
+
+    private static void consumerWorkerTest(KafkaConsumer<String, String> consumer) {
+        consumer.subscribe(Arrays.asList(TOPIC_NAME));
+        // 레코드 출력 후 완료되면 스레드를 종료하도록 newCachedThreadPool 사용
+        // newCachedThreadPool는 필요한 만큼 스레드 풀을 늘려서 사용하는 방식으로, 짧은 시간의 생명주기를 가진 스레드에 유용
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        while (true) {
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(10));
+            for (ConsumerRecord<String, String> record : records) {
+                ConsumerWorker consumerWorker = new ConsumerWorker(record.value());
+                // 실행
+                executorService.execute(consumerWorker);
+            }
+        }
     }
 
     /**
